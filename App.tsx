@@ -26,7 +26,6 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // PWA Install logic
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
@@ -49,11 +48,9 @@ const App: React.FC = () => {
       Notification.requestPermission();
     }
 
-    // Capture install prompt
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Check if user has already dismissed it this session
       const dismissed = sessionStorage.getItem('lifeflow_install_dismissed');
       if (!dismissed) {
         setShowInstallBanner(true);
@@ -62,7 +59,6 @@ const App: React.FC = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
-    // Detect if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setShowInstallBanner(false);
     }
@@ -101,8 +97,6 @@ const App: React.FC = () => {
           }
         }
       });
-
-      if (notifiedTasksRef.current.size > 100) notifiedTasksRef.current.clear();
     };
 
     const interval = setInterval(checkReminders, 30000);
@@ -127,11 +121,6 @@ const App: React.FC = () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
     setDeferredPrompt(null);
     setShowInstallBanner(false);
   };
@@ -142,32 +131,25 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-rose-50 shadow-2xl overflow-hidden relative border-x border-rose-100">
+    <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-rose-50 shadow-2xl overflow-hidden relative">
       
-      {/* PWA Install Banner */}
       {showInstallBanner && (
         <div className="absolute top-4 left-4 right-4 z-50 animate-in slide-in-from-top-10 duration-500">
           <div className="bg-white/80 backdrop-blur-md border border-rose-100 p-4 rounded-3xl shadow-xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-100">
+              <div className="w-10 h-10 bg-rose-500 rounded-2xl flex items-center justify-center text-white">
                 <Download size={20} />
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">Instalar LifeFlow</p>
-                <p className="text-[10px] text-slate-500">Acceso rápido desde tu inicio</p>
+                <p className="text-[10px] text-slate-500 leading-tight">Acceso rápido desde tu inicio</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={handleInstallClick}
-                className="px-4 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md active:scale-95 transition-transform"
-              >
+            <div className="flex items-center space-x-1">
+              <button onClick={handleInstallClick} className="px-3 py-1.5 bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md">
                 Instalar
               </button>
-              <button 
-                onClick={dismissInstallBanner}
-                className="p-2 text-slate-300 hover:text-slate-500"
-              >
+              <button onClick={dismissInstallBanner} className="p-2 text-slate-300">
                 <X size={18} />
               </button>
             </div>
@@ -196,48 +178,36 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <nav className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-rose-100 pb-safe shadow-[0_-8px_30px_rgba(244,63,94,0.08)] z-10">
-        <div className="flex justify-around items-center h-20 px-4">
+      <nav className="bg-white/95 backdrop-blur-lg border-t border-rose-100 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-8px_30px_rgba(244,63,94,0.05)] z-10">
+        <div className="flex justify-around items-center h-20 px-2">
           <button 
             onClick={() => handleTabChange('payments')}
-            className={`flex flex-col items-center justify-center w-full transition-all ${
+            className={`flex flex-col items-center justify-center w-full ${
               activeScreen === 'payments' ? 'text-rose-500' : 'text-slate-300'
             }`}
           >
-            <div className={`p-1 transition-transform ${activeScreen === 'payments' ? 'scale-110' : ''}`}>
-              <CreditCard size={24} strokeWidth={activeScreen === 'payments' ? 2.5 : 1.5} />
-            </div>
-            <span className={`text-[9px] font-extrabold uppercase mt-1 tracking-[0.1em] ${activeScreen === 'payments' ? 'opacity-100' : 'opacity-60'}`}>
-              Pagos
-            </span>
+            <CreditCard size={22} strokeWidth={activeScreen === 'payments' ? 2.5 : 2} />
+            <span className="text-[8px] font-extrabold uppercase mt-1 tracking-wider">Pagos</span>
           </button>
           
           <button 
             onClick={() => handleTabChange('planner')}
-            className={`flex flex-col items-center justify-center w-full transition-all ${
+            className={`flex flex-col items-center justify-center w-full ${
               activeScreen === 'planner' ? 'text-purple-500' : 'text-slate-300'
             }`}
           >
-            <div className={`p-1 transition-transform ${activeScreen === 'planner' ? 'scale-110' : ''}`}>
-              <Calendar size={24} strokeWidth={activeScreen === 'planner' ? 2.5 : 1.5} />
-            </div>
-            <span className={`text-[9px] font-extrabold uppercase mt-1 tracking-[0.1em] ${activeScreen === 'planner' ? 'opacity-100' : 'opacity-60'}`}>
-              Semana
-            </span>
+            <Calendar size={22} strokeWidth={activeScreen === 'planner' ? 2.5 : 2} />
+            <span className="text-[8px] font-extrabold uppercase mt-1 tracking-wider">Agenda</span>
           </button>
 
           <button 
             onClick={() => handleTabChange('history')}
-            className={`flex flex-col items-center justify-center w-full transition-all ${
+            className={`flex flex-col items-center justify-center w-full ${
               activeScreen === 'history' ? 'text-blue-500' : 'text-slate-300'
             }`}
           >
-            <div className={`p-1 transition-transform ${activeScreen === 'history' ? 'scale-110' : ''}`}>
-              <History size={24} strokeWidth={activeScreen === 'history' ? 2.5 : 1.5} />
-            </div>
-            <span className={`text-[9px] font-extrabold uppercase mt-1 tracking-[0.1em] ${activeScreen === 'history' ? 'opacity-100' : 'opacity-60'}`}>
-              Historial
-            </span>
+            <History size={22} strokeWidth={activeScreen === 'history' ? 2.5 : 2} />
+            <span className="text-[8px] font-extrabold uppercase mt-1 tracking-wider">Historial</span>
           </button>
         </div>
       </nav>

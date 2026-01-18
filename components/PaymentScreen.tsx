@@ -101,7 +101,6 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
   };
 
   const sortedPayments = useMemo(() => {
-    // Only show unpaid payments in the main list
     return [...payments].filter(p => !p.paid).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   }, [payments]);
 
@@ -113,17 +112,17 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return 'text-red-500 bg-red-50 border-red-200';
-    if (diffDays <= 3) return 'text-pink-500 bg-pink-50 border-pink-200';
-    return 'text-slate-400 bg-white border-slate-100';
+    if (diffDays <= 3) return 'text-pink-600 bg-pink-50 border-pink-200';
+    return 'text-slate-500 bg-white border-slate-100';
   };
 
   return (
     <div className="flex flex-col h-full bg-rose-50/20">
-      <div className="p-8 pb-4 flex justify-between items-center bg-white/50 backdrop-blur-sm">
+      <div className="p-6 pb-4 flex justify-between items-center bg-white/50 backdrop-blur-sm">
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold text-rose-800 tracking-tight">Mis Pagos</h1>
           {isSaving && (
-            <span className="text-[10px] text-rose-300 font-bold uppercase mt-1 animate-pulse flex items-center">
+            <span className="text-[10px] text-rose-400 font-bold uppercase mt-1 animate-pulse flex items-center">
               <Save size={10} className="mr-1" /> {editingId ? 'Editando...' : 'Guardando...'}
             </span>
           )}
@@ -139,7 +138,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 pb-32">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
         {isAdding && (
           <form onSubmit={handleSave} className="bg-white p-6 rounded-3xl shadow-xl border border-rose-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="flex justify-between items-center mb-2">
@@ -148,32 +147,32 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
               </h2>
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-rose-300 uppercase tracking-widest ml-1">Concepto</label>
+              <label className="text-[11px] font-bold text-rose-400 uppercase tracking-widest ml-1">Concepto</label>
               <input 
                 type="text" value={description} onChange={e => setDescription(e.target.value)}
-                className="w-full p-4 bg-rose-50/30 border border-rose-100 rounded-2xl focus:ring-2 focus:ring-rose-200 outline-none text-slate-700 placeholder-rose-200"
+                className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none text-slate-700 placeholder-rose-200"
                 placeholder="Ej. Alquiler..."
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-rose-300 uppercase tracking-widest ml-1">Monto</label>
+                <label className="text-[11px] font-bold text-rose-400 uppercase tracking-widest ml-1">Monto</label>
                 <input 
                   type="number" value={amount} onChange={e => setAmount(e.target.value)}
-                  className="w-full p-4 bg-rose-50/30 border border-rose-100 rounded-2xl focus:ring-2 focus:ring-rose-200 outline-none text-slate-700"
+                  className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none text-slate-700"
                   placeholder="0.00"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-rose-300 uppercase tracking-widest ml-1">Fecha</label>
+                <label className="text-[11px] font-bold text-rose-400 uppercase tracking-widest ml-1">Fecha</label>
                 <input 
                   type="date" value={date} onChange={e => setDate(e.target.value)}
-                  className="w-full p-4 bg-rose-50/30 border border-rose-100 rounded-2xl focus:ring-2 focus:ring-rose-200 outline-none text-slate-700"
+                  className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none text-slate-700"
                 />
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-rose-300 uppercase tracking-widest ml-1">Icono</label>
+              <label className="text-[11px] font-bold text-rose-400 uppercase tracking-widest ml-1">Icono</label>
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
             <button type="submit" className="w-full bg-rose-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-rose-200 active:scale-95 transition-transform">
@@ -182,21 +181,21 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
           </form>
         )}
 
-        <div className="overflow-hidden bg-white/60 rounded-3xl border border-rose-100 shadow-sm">
-          <table className="w-full text-left">
-            <thead className="text-rose-200 text-[10px] font-bold uppercase tracking-widest">
+        <div className="bg-white rounded-3xl border border-rose-100 shadow-sm overflow-hidden">
+          <table className="w-full table-fixed">
+            <thead className="bg-rose-50/30 text-rose-400 text-[9px] font-bold uppercase tracking-widest">
               <tr>
-                <th className="px-5 py-4">Concepto</th>
-                <th className="px-5 py-4 text-center">Monto</th>
-                <th className="px-5 py-4 text-center">Vence</th>
-                <th className="px-5 py-4"></th>
+                <th className="px-2 py-4 text-left w-[35%]">Concepto</th>
+                <th className="px-2 py-4 text-center w-[25%]">Monto</th>
+                <th className="px-2 py-4 text-center w-[18%]">Vence</th>
+                <th className="px-2 py-4 text-right w-[22%]"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-rose-50">
               {sortedPayments.length === 0 && !isAdding && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-24 text-center text-rose-200 italic text-sm">
-                    No tienes pagos pendientes. ¡Buen trabajo!
+                  <td colSpan={4} className="px-5 py-24 text-center text-rose-300 italic text-sm">
+                    No tienes pagos pendientes.
                   </td>
                 </tr>
               )}
@@ -204,35 +203,35 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
                 const Icon = ICON_MAP[p.icon] || ICON_MAP.Other;
                 const statusStyles = getStatusColor(p);
                 return (
-                  <tr key={p.id} className="transition-all hover:bg-rose-50/10">
-                    <td className="px-5 py-5">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-xl border ${statusStyles.split(' ')[2]} ${statusStyles.split(' ')[0]}`}>
-                          <Icon size={18} />
+                  <tr key={p.id} className="transition-all active:bg-rose-50/40">
+                    <td className="px-2 py-5 overflow-hidden">
+                      <div className="flex items-center space-x-1.5">
+                        <div className={`p-1.5 rounded-lg border flex-shrink-0 ${statusStyles.split(' ')[2]} ${statusStyles.split(' ')[0]}`}>
+                          <Icon size={14} />
                         </div>
-                        <span className="font-semibold text-sm text-slate-700">
+                        <span className="font-bold text-[11px] text-slate-700 truncate">
                           {p.description}
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-5 text-center font-bold text-sm text-slate-800">
+                    <td className="px-2 py-5 text-center font-extrabold text-[11px] text-slate-800 tabular-nums">
                       ${p.amount.toLocaleString()}
                     </td>
-                    <td className="px-5 py-5 text-center">
-                       <span className={`text-[9px] px-2 py-1 rounded-full border font-bold uppercase tracking-tighter ${statusStyles}`}>
-                         {p.dueDate}
+                    <td className="px-1 py-5 text-center">
+                       <span className={`text-[8px] px-1 py-0.5 rounded-md border font-bold tracking-tighter block truncate ${statusStyles}`}>
+                         {p.dueDate.slice(5)}
                        </span>
                     </td>
-                    <td className="px-5 py-5">
-                      <div className="flex items-center space-x-2">
-                        <button onClick={() => togglePaid(p.id)} className="transition-all active:scale-125">
-                          <Heart className="text-rose-100" size={24} />
+                    <td className="px-2 py-5">
+                      <div className="flex items-center space-x-0.5 justify-end">
+                        <button onClick={() => togglePaid(p.id)} className="p-1 transition-all active:scale-125 text-rose-400 hover:text-rose-600">
+                          <Heart size={18} />
                         </button>
-                        <button onClick={() => handleEdit(p)} className="text-rose-100 hover:text-rose-400 transition-colors">
-                          <Pencil size={18} />
+                        <button onClick={() => handleEdit(p)} className="p-1 text-slate-400 hover:text-rose-600">
+                          <Pencil size={16} />
                         </button>
-                        <button onClick={() => onDelete(p.id)} className="text-rose-100 hover:text-red-400 transition-colors">
-                          <Trash2 size={18} />
+                        <button onClick={() => onDelete(p.id)} className="p-1 text-slate-400 hover:text-red-600">
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>

@@ -53,7 +53,6 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
     if (!name || !time) return;
 
     if (editingId) {
-      // Corrected 'p' to 't' to match the map callback parameter
       setTasks(prev => prev.map(t => t.id === editingId ? {
         ...t,
         name,
@@ -170,52 +169,52 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
               {editingId ? 'Editar Tarea' : 'Nueva Tarea'}
             </h2>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Tarea</label>
+              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Tarea</label>
               <input 
                 type="text" value={name} onChange={e => setName(e.target.value)}
-                className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
                 placeholder="¿Qué planes tienes?"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Detalles</label>
+              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Detalles</label>
               <textarea 
                 value={desc} onChange={e => setDesc(e.target.value)}
-                className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none h-20 text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none h-20 text-slate-700"
                 placeholder="Añade una notita..."
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Hora</label>
+                <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Hora</label>
                 <input 
                   type="time" value={time} onChange={e => setTime(e.target.value)}
-                  className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Día</label>
+                <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Día</label>
                 <select 
                   value={day} onChange={e => setDay(e.target.value as DayOfWeek)}
-                  className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
                 >
                   {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1 flex items-center">
+              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1 flex items-center">
                 <Bell size={12} className="mr-1" /> Recordatorio
               </label>
               <select 
                 value={reminder} onChange={e => setReminder(parseInt(e.target.value))}
-                className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
               >
                 {REMINDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
               </select>
             </div>
              <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Icono</label>
+              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Icono</label>
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
             <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 active:scale-95 transition-transform">
@@ -226,7 +225,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
 
         {DAYS.map(d => (
           <div key={d} className="space-y-3">
-            <h2 className="text-[10px] font-bold text-purple-300 uppercase tracking-widest px-1">{d}</h2>
+            <h2 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest px-1">{d}</h2>
             <div className="space-y-3">
               {groupedTasks[d].length === 0 ? (
                 <div className="p-5 rounded-3xl bg-white/40 border border-dashed border-purple-100 text-center text-purple-200 text-sm italic">
@@ -248,7 +247,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                         {t.done ? (
                           <Heart size={28} className="text-purple-400 fill-purple-400" />
                         ) : (
-                          <Heart size={28} className="text-purple-100" />
+                          <Heart size={28} className="text-slate-300" />
                         )}
                       </button>
                       <div className="flex-1 min-w-0">
@@ -259,17 +258,17 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                           </h3>
                         </div>
                         {t.description && (
-                          <p className={`text-xs truncate ${t.done ? 'text-purple-100' : 'text-slate-400'}`}>
+                          <p className={`text-xs truncate ${t.done ? 'text-purple-200' : 'text-slate-500'}`}>
                             {t.description}
                           </p>
                         )}
-                        <div className="flex items-center space-x-3 mt-1 text-[9px] font-bold text-purple-300 uppercase">
+                        <div className="flex items-center space-x-3 mt-1 text-[9px] font-bold text-purple-400 uppercase">
                           <div className="flex items-center space-x-1">
                             <Clock size={10} />
                             <span>{t.time}</span>
                           </div>
                           {t.reminderMinutes && !t.done && (
-                            <div className="flex items-center space-x-1 text-rose-400">
+                            <div className="flex items-center space-x-1 text-rose-500">
                               <Bell size={10} />
                               <span>-{t.reminderMinutes}m</span>
                             </div>
@@ -277,10 +276,10 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                         </div>
                       </div>
                       <div className="flex flex-col items-center space-y-2">
-                        <button onClick={() => handleEdit(t)} className="p-2 text-purple-100 hover:text-purple-400 transition-colors">
+                        <button onClick={() => handleEdit(t)} className="p-2 text-slate-300 hover:text-purple-500 transition-colors">
                           <Pencil size={18} />
                         </button>
-                        <button onClick={() => deleteTask(t.id)} className="p-2 text-purple-100 hover:text-red-400 transition-colors">
+                        <button onClick={() => deleteTask(t.id)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
                           <Trash2 size={18} />
                         </button>
                       </div>
