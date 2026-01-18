@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  const notifiedTasksRef = useRef<Set<string>>(new Set());
+  const notifiedItemsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     localStorage.setItem('lifeflow_payments', JSON.stringify(payments));
@@ -69,22 +69,51 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkReminders = () => {
       const now = new Date();
-      const currentDayStr = SPANISH_DAYS[now.getDay()];
+      const todayStr = now.toISOString().split('T')[0];
+      
+      const tomorrow = new Date();
+      tomorrow.setDate(now.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+      // 1. Notificaciones de Pagos
+      payments.forEach(payment => {
+        if (payment.paid) return;
+
+        const isToday = payment.dueDate === todayStr;
+        const isTomorrow = payment.dueDate === tomorrowStr;
+
+        if (isToday || isTomorrow) {
+          const notificationKey = `pay-${payment.id}-${todayStr}`;
+          if (!notifiedItemsRef.current.has(notificationKey)) {
+            if (Notification.permission === "granted") {
+              new Notification(isToday ? '⚠️ Pago vence HOY' : '🔔 Pago vence mañana', {
+                body: `${payment.description}: $${payment.amount.toLocaleString()}`,
+                icon: 'https://cdn-icons-png.flaticon.com/512/3119/3119338.png'
+              });
+              audioService.playSuccess();
+              notifiedItemsRef.current.add(notificationKey);
+            }
+          }
+        }
+      });
+
+      // 2. Notificaciones de Tareas (Agenda)
+      const currentDayName = SPANISH_DAYS[now.getDay()];
       const currentH = now.getHours();
       const currentM = now.getMinutes();
       const currentTimeInMinutes = currentH * 60 + currentM;
 
       tasks.forEach(task => {
         if (task.done || !task.reminderMinutes) return;
-        if (task.day !== currentDayStr) return;
+        if (task.day !== currentDayName) return;
 
         const [taskH, taskM] = task.time.split(':').map(Number);
         const taskTimeInMinutes = taskH * 60 + taskM;
         const triggerTime = taskTimeInMinutes - task.reminderMinutes;
 
-        const notificationKey = `${task.id}-${now.toDateString()}-${triggerTime}`;
+        const notificationKey = `task-${task.id}-${todayStr}-${triggerTime}`;
 
-        if (currentTimeInMinutes === triggerTime && !notifiedTasksRef.current.has(notificationKey)) {
+        if (currentTimeInMinutes === triggerTime && !notifiedItemsRef.current.has(notificationKey)) {
           if (Notification.permission === "granted") {
             new Notification(`Recordatorio: ${task.name}`, {
               body: task.reminderMinutes === 1 
@@ -93,15 +122,17 @@ const App: React.FC = () => {
               icon: 'https://cdn-icons-png.flaticon.com/512/3119/3119338.png'
             });
             audioService.playSuccess();
-            notifiedTasksRef.current.add(notificationKey);
+            notifiedItemsRef.current.add(notificationKey);
           }
         }
       });
     };
 
-    const interval = setInterval(checkReminders, 30000);
+    // Ejecutar inmediatamente al cargar y luego cada minuto
+    checkReminders();
+    const interval = setInterval(checkReminders, 60000);
     return () => clearInterval(interval);
-  }, [tasks]);
+  }, [tasks, payments]);
 
   const handleTabChange = (screen: AppScreen) => {
     setActiveScreen(screen);

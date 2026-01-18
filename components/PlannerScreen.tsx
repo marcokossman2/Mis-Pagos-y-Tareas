@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Heart, Clock, Save, Bell, Pencil, X } from 'lucide-react';
-import { Task, DayOfWeek, DAYS, IconName } from '../types.ts';
+import { Plus, Trash2, Heart, Clock, Save, Bell, Pencil, X, Repeat } from 'lucide-react';
+import { Task, DayOfWeek, DAYS, IconName, RecurrenceType } from '../types.ts';
 import { ICON_MAP } from '../constants.tsx';
 import { IconPicker } from './IconPicker.tsx';
 import { audioService } from '../services/audio.ts';
@@ -31,6 +31,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
   const [day, setDay] = useState<DayOfWeek>(() => (localStorage.getItem('draft_task_day') as DayOfWeek) || 'Lunes');
   const [icon, setIcon] = useState<IconName>(() => (localStorage.getItem('draft_task_icon') as IconName) || 'Work');
   const [reminder, setReminder] = useState<number>(0);
+  const [recurrence, setRecurrence] = useState<RecurrenceType>(() => (localStorage.getItem('draft_task_rec') as RecurrenceType) || 'none');
 
   useEffect(() => {
     if (!editingId) {
@@ -39,6 +40,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
       localStorage.setItem('draft_task_time', time);
       localStorage.setItem('draft_task_day', day);
       localStorage.setItem('draft_task_icon', icon);
+      localStorage.setItem('draft_task_rec', recurrence);
     }
 
     if (name || desc || time) {
@@ -46,7 +48,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
       const timer = setTimeout(() => setIsSaving(false), 800);
       return () => clearTimeout(timer);
     }
-  }, [name, desc, time, day, icon, editingId]);
+  }, [name, desc, time, day, icon, recurrence, editingId]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +62,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
         time,
         day,
         icon,
+        recurrence,
         reminderMinutes: reminder > 0 ? reminder : undefined
       } : t));
       setEditingId(null);
@@ -72,6 +75,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
         day,
         done: false,
         icon,
+        recurrence,
         reminderMinutes: reminder > 0 ? reminder : undefined
       };
       setTasks(prev => [...prev, newTask]);
@@ -80,10 +84,6 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
     resetForm();
     setIsAdding(false);
     audioService.playSuccess();
-
-    if (reminder > 0 && "Notification" in window && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
   };
 
   const resetForm = () => {
@@ -92,12 +92,14 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
     setTime('');
     setIcon('Work');
     setReminder(0);
+    setRecurrence('none');
     setEditingId(null);
     localStorage.removeItem('draft_task_name');
     localStorage.removeItem('draft_task_desc');
     localStorage.removeItem('draft_task_time');
     localStorage.removeItem('draft_task_day');
     localStorage.removeItem('draft_task_icon');
+    localStorage.removeItem('draft_task_rec');
   };
 
   const handleEdit = (t: Task) => {
@@ -107,6 +109,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
     setDay(t.day as DayOfWeek);
     setIcon(t.icon);
     setReminder(t.reminderMinutes || 0);
+    setRecurrence(t.recurrence);
     setEditingId(t.id);
     setIsAdding(true);
     audioService.playTick();
@@ -172,16 +175,8 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
               <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Tarea</label>
               <input 
                 type="text" value={name} onChange={e => setName(e.target.value)}
-                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 text-base"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl outline-none text-slate-700 text-base"
                 placeholder="¿Qué planes tienes?"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Detalles</label>
-              <textarea 
-                value={desc} onChange={e => setDesc(e.target.value)}
-                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none h-20 text-slate-700 text-base"
-                placeholder="Añade una notita..."
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -189,36 +184,50 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                 <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Hora</label>
                 <input 
                   type="time" value={time} onChange={e => setTime(e.target.value)}
-                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-base"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl outline-none text-base"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Día</label>
                 <select 
                   value={day} onChange={e => setDay(e.target.value as DayOfWeek)}
-                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 text-base"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl outline-none text-slate-700 text-base appearance-none"
                 >
                   {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1 flex items-center">
-                <Bell size={12} className="mr-1" /> Recordatorio
-              </label>
-              <select 
-                value={reminder} onChange={e => setReminder(parseInt(e.target.value))}
-                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 text-base"
-              >
-                {REMINDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1 flex items-center">
+                  <Bell size={12} className="mr-1" /> Aviso
+                </label>
+                <select 
+                  value={reminder} onChange={e => setReminder(parseInt(e.target.value))}
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl outline-none text-slate-700 text-base appearance-none"
+                >
+                  {REMINDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1 flex items-center">
+                  <Repeat size={12} className="mr-1" /> Repetir
+                </label>
+                <select 
+                  value={recurrence} onChange={e => setRecurrence(e.target.value as RecurrenceType)}
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl outline-none text-slate-700 text-base appearance-none"
+                >
+                  <option value="none">Una vez</option>
+                  <option value="weekly">Semanal</option>
+                </select>
+              </div>
             </div>
-             <div className="space-y-1">
+            <div className="space-y-1">
               <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Icono</label>
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
-            <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 active:scale-95 transition-transform text-base">
-              {editingId ? 'Actualizar Agenda' : 'Añadir a la Agenda'}
+            <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-transform text-base">
+              {editingId ? 'Actualizar' : 'Añadir'}
             </button>
           </form>
         )}
@@ -253,15 +262,11 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
                           <Icon size={14} className={t.done ? 'text-purple-200' : 'text-purple-400'} />
-                          <h3 className={`font-semibold truncate text-[15px] ${t.done ? 'line-through text-purple-200' : 'text-slate-800'}`}>
+                          <h3 className={`font-semibold truncate text-[15px] flex items-center ${t.done ? 'line-through text-purple-200' : 'text-slate-800'}`}>
                             {t.name}
+                            {t.recurrence === 'weekly' && <Repeat size={10} className="ml-1 text-purple-300" />}
                           </h3>
                         </div>
-                        {t.description && (
-                          <p className={`text-sm truncate mt-0.5 ${t.done ? 'text-purple-200' : 'text-slate-500'}`}>
-                            {t.description}
-                          </p>
-                        )}
                         <div className="flex items-center space-x-3 mt-1.5 text-[10px] font-bold text-purple-400 uppercase">
                           <div className="flex items-center space-x-1">
                             <Clock size={11} />

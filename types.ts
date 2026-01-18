@@ -4,6 +4,8 @@ export type IconName =
   | 'Food' | 'Transport' | 'Gift' | 'Stream' | 'Travel' | 'Pet' | 'Tech' | 'Utility' | 'Beauty' | 'Coffee'
   | 'Music' | 'Camera' | 'Heart' | 'Mail' | 'MapPin' | 'Brush' | 'Moon' | 'Sun' | 'Gamepad' | 'Bike' | 'Wallet' | 'Calendar' | 'Shirt' | 'Scissors' | 'Hammer';
 
+export type RecurrenceType = 'none' | 'weekly' | 'monthly' | 'yearly';
+
 export interface Payment {
   id: string;
   description: string;
@@ -11,6 +13,7 @@ export interface Payment {
   dueDate: string; // ISO string YYYY-MM-DD
   paid: boolean;
   icon: IconName;
+  recurrence: RecurrenceType;
 }
 
 export interface Task {
@@ -21,7 +24,8 @@ export interface Task {
   day: string; // Lunes, Martes, etc.
   done: boolean;
   icon: IconName;
-  reminderMinutes?: number; // Minutos antes de la tarea
+  reminderMinutes?: number;
+  recurrence: RecurrenceType;
 }
 
 export type DayOfWeek = 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo';

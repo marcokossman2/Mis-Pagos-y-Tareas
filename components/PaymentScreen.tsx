@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Heart, Save, Pencil, X } from 'lucide-react';
-import { Payment, IconName } from '../types.ts';
+import { Plus, Trash2, Heart, Save, Pencil, X, Repeat } from 'lucide-react';
+import { Payment, IconName, RecurrenceType } from '../types.ts';
 import { ICON_MAP } from '../constants.tsx';
 import { IconPicker } from './IconPicker.tsx';
 import { audioService } from '../services/audio.ts';
@@ -21,6 +21,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
   const [amount, setAmount] = useState(() => localStorage.getItem('draft_pay_amount') || '');
   const [date, setDate] = useState(() => localStorage.getItem('draft_pay_date') || '');
   const [icon, setIcon] = useState<IconName>(() => (localStorage.getItem('draft_pay_icon') as IconName) || 'Bill');
+  const [recurrence, setRecurrence] = useState<RecurrenceType>(() => (localStorage.getItem('draft_pay_rec') as RecurrenceType) || 'none');
 
   useEffect(() => {
     if (!editingId) {
@@ -28,6 +29,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
       localStorage.setItem('draft_pay_amount', amount);
       localStorage.setItem('draft_pay_date', date);
       localStorage.setItem('draft_pay_icon', icon);
+      localStorage.setItem('draft_pay_rec', recurrence);
     }
     
     if (description || amount || date) {
@@ -35,7 +37,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
       const timer = setTimeout(() => setIsSaving(false), 800);
       return () => clearTimeout(timer);
     }
-  }, [description, amount, date, icon, editingId]);
+  }, [description, amount, date, icon, recurrence, editingId]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +49,8 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
         description,
         amount: parseFloat(amount),
         dueDate: date,
-        icon
+        icon,
+        recurrence
       } : p));
       setEditingId(null);
     } else {
@@ -57,7 +60,8 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
         amount: parseFloat(amount),
         dueDate: date,
         paid: false,
-        icon
+        icon,
+        recurrence
       };
       setPayments(prev => [...prev, newPayment]);
     }
@@ -72,11 +76,13 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
     setAmount('');
     setDate('');
     setIcon('Bill');
+    setRecurrence('none');
     setEditingId(null);
     localStorage.removeItem('draft_pay_desc');
     localStorage.removeItem('draft_pay_amount');
     localStorage.removeItem('draft_pay_date');
     localStorage.removeItem('draft_pay_icon');
+    localStorage.removeItem('draft_pay_rec');
   };
 
   const handleEdit = (p: Payment) => {
@@ -84,20 +90,49 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
     setAmount(p.amount.toString());
     setDate(p.dueDate);
     setIcon(p.icon);
+    setRecurrence(p.recurrence);
     setEditingId(p.id);
     setIsAdding(true);
     audioService.playTick();
   };
 
   const togglePaid = (id: string) => {
-    setPayments(prev => prev.map(p => {
-      if (p.id === id) {
-        if (!p.paid) audioService.playSuccess();
-        else audioService.playTick();
-        return { ...p, paid: !p.paid };
+    setPayments(prev => {
+      const current = prev.find(p => p.id === id);
+      if (!current) return prev;
+
+      const newState = !current.paid;
+      
+      // Lógica de recurrencia: Si se marca como pagado y es recurrente, crear el siguiente
+      let extraPayments: Payment[] = [];
+      if (newState && current.recurrence !== 'none') {
+        const nextDate = new Date(current.dueDate);
+        if (current.recurrence === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+        if (current.recurrence === 'yearly') nextDate.setFullYear(nextDate.getFullYear() + 1);
+        
+        // Evitar duplicados del mismo periodo si ya existe uno pendiente igual
+        const alreadyExists = prev.some(p => 
+          p.description === current.description && 
+          p.dueDate === nextDate.toISOString().split('T')[0] && 
+          !p.paid
+        );
+
+        if (!alreadyExists) {
+          extraPayments.push({
+            ...current,
+            id: crypto.randomUUID(),
+            paid: false,
+            dueDate: nextDate.toISOString().split('T')[0]
+          });
+        }
       }
-      return p;
-    }));
+
+      if (newState) audioService.playSuccess();
+      else audioService.playTick();
+
+      const updatedList = prev.map(p => p.id === id ? { ...p, paid: newState } : p);
+      return [...updatedList, ...extraPayments];
+    });
   };
 
   const sortedPayments = useMemo(() => {
@@ -141,16 +176,14 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
         {isAdding && (
           <form onSubmit={handleSave} className="bg-white p-6 rounded-3xl shadow-xl border border-rose-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-base font-bold text-rose-800 uppercase tracking-widest">
-                {editingId ? 'Editar Pago' : 'Nuevo Pago'}
-              </h2>
-            </div>
+            <h2 className="text-base font-bold text-rose-800 uppercase tracking-widest px-1">
+              {editingId ? 'Editar Pago' : 'Nuevo Pago'}
+            </h2>
             <div className="space-y-1">
               <label className="text-xs font-bold text-rose-400 uppercase tracking-widest ml-1">Concepto</label>
               <input 
                 type="text" value={description} onChange={e => setDescription(e.target.value)}
-                className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none text-slate-700 placeholder-rose-200"
+                className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl outline-none text-slate-700 text-base"
                 placeholder="Ej. Alquiler..."
               />
             </div>
@@ -159,7 +192,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
                 <label className="text-xs font-bold text-rose-400 uppercase tracking-widest ml-1">Monto</label>
                 <input 
                   type="number" value={amount} onChange={e => setAmount(e.target.value)}
-                  className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none text-slate-700"
+                  className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl outline-none text-slate-700 text-base"
                   placeholder="0.00"
                 />
               </div>
@@ -167,16 +200,29 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
                 <label className="text-xs font-bold text-rose-400 uppercase tracking-widest ml-1">Fecha</label>
                 <input 
                   type="date" value={date} onChange={e => setDate(e.target.value)}
-                  className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none text-slate-700"
+                  className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl outline-none text-slate-700 text-base"
                 />
               </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-rose-400 uppercase tracking-widest ml-1 flex items-center">
+                <Repeat size={12} className="mr-1" /> Recurrencia
+              </label>
+              <select 
+                value={recurrence} onChange={e => setRecurrence(e.target.value as RecurrenceType)}
+                className="w-full p-4 bg-rose-50/30 border border-rose-200 rounded-2xl outline-none text-slate-700 text-base appearance-none"
+              >
+                <option value="none">No se repite</option>
+                <option value="monthly">Cada mes</option>
+                <option value="yearly">Cada año</option>
+              </select>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-rose-400 uppercase tracking-widest ml-1">Icono</label>
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
-            <button type="submit" className="w-full bg-rose-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-rose-200 active:scale-95 transition-transform text-base">
-              {editingId ? 'Actualizar Pago' : 'Guardar Pago'}
+            <button type="submit" className="w-full bg-rose-500 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-transform text-base">
+              {editingId ? 'Actualizar' : 'Guardar Pago'}
             </button>
           </form>
         )}
@@ -209,9 +255,12 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
                         <div className={`p-1.5 rounded-lg border flex-shrink-0 ${statusStyles.split(' ')[2]} ${statusStyles.split(' ')[0]}`}>
                           <Icon size={14} />
                         </div>
-                        <span className="font-bold text-[13px] text-slate-700 truncate">
-                          {p.description}
-                        </span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-[13px] text-slate-700 truncate flex items-center">
+                            {p.description}
+                            {p.recurrence !== 'none' && <Repeat size={10} className="ml-1 text-rose-300" />}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-2 py-5 text-center font-extrabold text-[13px] text-slate-800 tabular-nums">
