@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Heart, Save } from 'lucide-react';
+import { Plus, Trash2, Heart, Save, Pencil, X } from 'lucide-react';
 import { Payment, IconName } from '../types.ts';
 import { ICON_MAP } from '../constants.tsx';
 import { IconPicker } from './IconPicker.tsx';
@@ -13,6 +13,7 @@ interface PaymentScreenProps {
 
 export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayments }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const [description, setDescription] = useState(() => localStorage.getItem('draft_pay_desc') || '');
@@ -21,44 +22,71 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
   const [icon, setIcon] = useState<IconName>(() => (localStorage.getItem('draft_pay_icon') as IconName) || 'Bill');
 
   useEffect(() => {
-    localStorage.setItem('draft_pay_desc', description);
-    localStorage.setItem('draft_pay_amount', amount);
-    localStorage.setItem('draft_pay_date', date);
-    localStorage.setItem('draft_pay_icon', icon);
+    // Solo guardamos borradores si no estamos editando uno existente
+    if (!editingId) {
+      localStorage.setItem('draft_pay_desc', description);
+      localStorage.setItem('draft_pay_amount', amount);
+      localStorage.setItem('draft_pay_date', date);
+      localStorage.setItem('draft_pay_icon', icon);
+    }
     
     if (description || amount || date) {
       setIsSaving(true);
       const timer = setTimeout(() => setIsSaving(false), 800);
       return () => clearTimeout(timer);
     }
-  }, [description, amount, date, icon]);
+  }, [description, amount, date, icon, editingId]);
 
-  const addPayment = (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description || !amount || !date) return;
 
-    const newPayment: Payment = {
-      id: crypto.randomUUID(),
-      description,
-      amount: parseFloat(amount),
-      dueDate: date,
-      paid: false,
-      icon
-    };
+    if (editingId) {
+      setPayments(prev => prev.map(p => p.id === editingId ? {
+        ...p,
+        description,
+        amount: parseFloat(amount),
+        dueDate: date,
+        icon
+      } : p));
+      setEditingId(null);
+    } else {
+      const newPayment: Payment = {
+        id: crypto.randomUUID(),
+        description,
+        amount: parseFloat(amount),
+        dueDate: date,
+        paid: false,
+        icon
+      };
+      setPayments(prev => [...prev, newPayment]);
+    }
 
-    setPayments(prev => [...prev, newPayment]);
+    resetForm();
+    setIsAdding(false);
+    audioService.playSuccess();
+  };
+
+  const resetForm = () => {
     setDescription('');
     setAmount('');
     setDate('');
     setIcon('Bill');
-    setIsAdding(false);
-    
+    setEditingId(null);
     localStorage.removeItem('draft_pay_desc');
     localStorage.removeItem('draft_pay_amount');
     localStorage.removeItem('draft_pay_date');
     localStorage.removeItem('draft_pay_icon');
-    
-    audioService.playSuccess();
+  };
+
+  const handleEdit = (p: Payment) => {
+    setDescription(p.description);
+    setAmount(p.amount.toString());
+    setDate(p.dueDate);
+    setIcon(p.icon);
+    setEditingId(p.id);
+    setIsAdding(true);
+    audioService.playTick();
   };
 
   const togglePaid = (id: string) => {
@@ -102,21 +130,29 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
           <h1 className="text-3xl font-bold text-rose-800 tracking-tight">Mis Pagos</h1>
           {isSaving && (
             <span className="text-[10px] text-rose-300 font-bold uppercase mt-1 animate-pulse flex items-center">
-              <Save size={10} className="mr-1" /> Guardando...
+              <Save size={10} className="mr-1" /> {editingId ? 'Editando...' : 'Guardando...'}
             </span>
           )}
         </div>
         <button 
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => {
+            if (isAdding) resetForm();
+            setIsAdding(!isAdding);
+          }}
           className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 bg-gradient-to-br from-rose-300 to-rose-500 text-white shadow-rose-200`}
         >
-          <Plus size={28} className={`transition-transform duration-300 ${isAdding ? 'rotate-45' : ''}`} />
+          {isAdding ? <X size={28} /> : <Plus size={28} />}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4 pb-32">
         {isAdding && (
-          <form onSubmit={addPayment} className="bg-white p-6 rounded-3xl shadow-xl border border-rose-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <form onSubmit={handleSave} className="bg-white p-6 rounded-3xl shadow-xl border border-rose-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-sm font-bold text-rose-800 uppercase tracking-widest">
+                {editingId ? 'Editar Pago' : 'Nuevo Pago'}
+              </h2>
+            </div>
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-rose-300 uppercase tracking-widest ml-1">Concepto</label>
               <input 
@@ -147,7 +183,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
             <button type="submit" className="w-full bg-rose-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-rose-200 active:scale-95 transition-transform">
-              Guardar Pago
+              {editingId ? 'Actualizar Pago' : 'Guardar Pago'}
             </button>
           </form>
         )}
@@ -197,6 +233,9 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
                       <div className="flex items-center space-x-2">
                         <button onClick={() => togglePaid(p.id)} className="transition-all active:scale-125">
                           {p.paid ? <Heart className="text-rose-500 fill-rose-500" size={24} /> : <Heart className="text-rose-100" size={24} />}
+                        </button>
+                        <button onClick={() => handleEdit(p)} className="text-rose-100 hover:text-rose-400 transition-colors">
+                          <Pencil size={18} />
                         </button>
                         <button onClick={() => deletePayment(p.id)} className="text-rose-100 hover:text-red-400 transition-colors">
                           <Trash2 size={18} />

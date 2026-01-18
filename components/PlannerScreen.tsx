@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Heart, Clock, Save, Bell } from 'lucide-react';
+import { Plus, Trash2, Heart, Clock, Save, Bell, Pencil, X } from 'lucide-react';
 import { Task, DayOfWeek, DAYS, IconName } from '../types.ts';
 import { ICON_MAP } from '../constants.tsx';
 import { IconPicker } from './IconPicker.tsx';
@@ -22,6 +22,7 @@ const REMINDER_OPTIONS = [
 
 export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const [name, setName] = useState(() => localStorage.getItem('draft_task_name') || '');
@@ -32,53 +33,84 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
   const [reminder, setReminder] = useState<number>(0);
 
   useEffect(() => {
-    localStorage.setItem('draft_task_name', name);
-    localStorage.setItem('draft_task_desc', desc);
-    localStorage.setItem('draft_task_time', time);
-    localStorage.setItem('draft_task_day', day);
-    localStorage.setItem('draft_task_icon', icon);
+    if (!editingId) {
+      localStorage.setItem('draft_task_name', name);
+      localStorage.setItem('draft_task_desc', desc);
+      localStorage.setItem('draft_task_time', time);
+      localStorage.setItem('draft_task_day', day);
+      localStorage.setItem('draft_task_icon', icon);
+    }
 
     if (name || desc || time) {
       setIsSaving(true);
       const timer = setTimeout(() => setIsSaving(false), 800);
       return () => clearTimeout(timer);
     }
-  }, [name, desc, time, day, icon]);
+  }, [name, desc, time, day, icon, editingId]);
 
-  const addTask = (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !time) return;
 
-    const newTask: Task = {
-      id: crypto.randomUUID(),
-      name,
-      description: desc,
-      time,
-      day,
-      done: false,
-      icon,
-      reminderMinutes: reminder > 0 ? reminder : undefined
-    };
+    if (editingId) {
+      // Corrected 'p' to 't' to match the map callback parameter
+      setTasks(prev => prev.map(t => t.id === editingId ? {
+        ...t,
+        name,
+        description: desc,
+        time,
+        day,
+        icon,
+        reminderMinutes: reminder > 0 ? reminder : undefined
+      } : t));
+      setEditingId(null);
+    } else {
+      const newTask: Task = {
+        id: crypto.randomUUID(),
+        name,
+        description: desc,
+        time,
+        day,
+        done: false,
+        icon,
+        reminderMinutes: reminder > 0 ? reminder : undefined
+      };
+      setTasks(prev => [...prev, newTask]);
+    }
 
-    setTasks(prev => [...prev, newTask]);
-    setName('');
-    setDesc('');
-    setTime('');
-    setIcon('Work');
-    setReminder(0);
+    resetForm();
     setIsAdding(false);
-    
-    localStorage.removeItem('draft_task_name');
-    localStorage.removeItem('draft_task_desc');
-    localStorage.removeItem('draft_task_time');
-    localStorage.removeItem('draft_task_day');
-    localStorage.removeItem('draft_task_icon');
-    
     audioService.playSuccess();
 
     if (reminder > 0 && "Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
+  };
+
+  const resetForm = () => {
+    setName('');
+    setDesc('');
+    setTime('');
+    setIcon('Work');
+    setReminder(0);
+    setEditingId(null);
+    localStorage.removeItem('draft_task_name');
+    localStorage.removeItem('draft_task_desc');
+    localStorage.removeItem('draft_task_time');
+    localStorage.removeItem('draft_task_day');
+    localStorage.removeItem('draft_task_icon');
+  };
+
+  const handleEdit = (t: Task) => {
+    setName(t.name);
+    setDesc(t.description);
+    setTime(t.time);
+    setDay(t.day as DayOfWeek);
+    setIcon(t.icon);
+    setReminder(t.reminderMinutes || 0);
+    setEditingId(t.id);
+    setIsAdding(true);
+    audioService.playTick();
   };
 
   const toggleTask = (id: string) => {
@@ -116,21 +148,27 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
           <h1 className="text-3xl font-bold text-indigo-800 tracking-tight">Mi Semana</h1>
           {isSaving && (
             <span className="text-[10px] text-purple-400 font-bold uppercase mt-1 animate-pulse flex items-center">
-              <Save size={10} className="mr-1" /> Guardando...
+              <Save size={10} className="mr-1" /> {editingId ? 'Editando...' : 'Guardando...'}
             </span>
           )}
         </div>
         <button 
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => {
+            if (isAdding) resetForm();
+            setIsAdding(!isAdding);
+          }}
           className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 bg-gradient-to-br from-purple-300 to-purple-500 text-white shadow-purple-200`}
         >
-          <Plus size={28} className={`transition-transform duration-300 ${isAdding ? 'rotate-45' : ''}`} />
+          {isAdding ? <X size={28} /> : <Plus size={28} />}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-32">
         {isAdding && (
-          <form onSubmit={addTask} className="bg-white p-6 rounded-3xl shadow-xl border border-purple-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <form onSubmit={handleSave} className="bg-white p-6 rounded-3xl shadow-xl border border-purple-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <h2 className="text-sm font-bold text-purple-800 uppercase tracking-widest px-1">
+              {editingId ? 'Editar Tarea' : 'Nueva Tarea'}
+            </h2>
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Tarea</label>
               <input 
@@ -181,7 +219,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
             <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 active:scale-95 transition-transform">
-              Añadir a la Agenda
+              {editingId ? 'Actualizar Agenda' : 'Añadir a la Agenda'}
             </button>
           </form>
         )}
@@ -238,9 +276,14 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                           )}
                         </div>
                       </div>
-                      <button onClick={() => deleteTask(t.id)} className="p-2 text-purple-100 hover:text-red-400 transition-colors">
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex flex-col items-center space-y-2">
+                        <button onClick={() => handleEdit(t)} className="p-2 text-purple-100 hover:text-purple-400 transition-colors">
+                          <Pencil size={18} />
+                        </button>
+                        <button onClick={() => deleteTask(t.id)} className="p-2 text-purple-100 hover:text-red-400 transition-colors">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })
