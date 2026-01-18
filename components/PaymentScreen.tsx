@@ -9,9 +9,10 @@ import { audioService } from '../services/audio.ts';
 interface PaymentScreenProps {
   payments: Payment[];
   setPayments: React.Dispatch<React.SetStateAction<Payment[]>>;
+  onDelete: (id: string) => void;
 }
 
-export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayments }) => {
+export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayments, onDelete }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -22,7 +23,6 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
   const [icon, setIcon] = useState<IconName>(() => (localStorage.getItem('draft_pay_icon') as IconName) || 'Bill');
 
   useEffect(() => {
-    // Solo guardamos borradores si no estamos editando uno existente
     if (!editingId) {
       localStorage.setItem('draft_pay_desc', description);
       localStorage.setItem('draft_pay_amount', amount);
@@ -100,18 +100,12 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
     }));
   };
 
-  const deletePayment = (id: string) => {
-    setPayments(prev => prev.filter(p => p.id !== id));
-    audioService.playTick();
-  };
-
   const sortedPayments = useMemo(() => {
-    return [...payments].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    // Only show unpaid payments in the main list
+    return [...payments].filter(p => !p.paid).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   }, [payments]);
 
   const getStatusColor = (payment: Payment) => {
-    if (payment.paid) return 'text-rose-500 bg-rose-50 border-rose-200';
-    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const due = new Date(payment.dueDate);
@@ -202,26 +196,26 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
               {sortedPayments.length === 0 && !isAdding && (
                 <tr>
                   <td colSpan={4} className="px-5 py-24 text-center text-rose-200 italic text-sm">
-                    No hay registros aún...
+                    No tienes pagos pendientes. ¡Buen trabajo!
                   </td>
                 </tr>
               )}
               {sortedPayments.map((p) => {
-                const Icon = ICON_MAP[p.icon];
+                const Icon = ICON_MAP[p.icon] || ICON_MAP.Other;
                 const statusStyles = getStatusColor(p);
                 return (
-                  <tr key={p.id} className={`transition-all ${p.paid ? 'bg-rose-50/20' : 'hover:bg-rose-50/10'}`}>
+                  <tr key={p.id} className="transition-all hover:bg-rose-50/10">
                     <td className="px-5 py-5">
                       <div className="flex items-center space-x-3">
                         <div className={`p-2 rounded-xl border ${statusStyles.split(' ')[2]} ${statusStyles.split(' ')[0]}`}>
                           <Icon size={18} />
                         </div>
-                        <span className={`font-semibold text-sm ${p.paid ? 'line-through text-rose-200' : 'text-slate-700'}`}>
+                        <span className="font-semibold text-sm text-slate-700">
                           {p.description}
                         </span>
                       </div>
                     </td>
-                    <td className={`px-5 py-5 text-center font-bold text-sm ${p.paid ? 'text-rose-200' : 'text-slate-800'}`}>
+                    <td className="px-5 py-5 text-center font-bold text-sm text-slate-800">
                       ${p.amount.toLocaleString()}
                     </td>
                     <td className="px-5 py-5 text-center">
@@ -232,12 +226,12 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({ payments, setPayme
                     <td className="px-5 py-5">
                       <div className="flex items-center space-x-2">
                         <button onClick={() => togglePaid(p.id)} className="transition-all active:scale-125">
-                          {p.paid ? <Heart className="text-rose-500 fill-rose-500" size={24} /> : <Heart className="text-rose-100" size={24} />}
+                          <Heart className="text-rose-100" size={24} />
                         </button>
                         <button onClick={() => handleEdit(p)} className="text-rose-100 hover:text-rose-400 transition-colors">
                           <Pencil size={18} />
                         </button>
-                        <button onClick={() => deletePayment(p.id)} className="text-rose-100 hover:text-red-400 transition-colors">
+                        <button onClick={() => onDelete(p.id)} className="text-rose-100 hover:text-red-400 transition-colors">
                           <Trash2 size={18} />
                         </button>
                       </div>

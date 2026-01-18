@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { IconName } from './types';
 
+// Fix: Adding all missing icon mappings to satisfy Record<IconName, LucideIcon>
 export const ICON_MAP: Record<IconName, LucideIcon> = {
   Bill: CreditCard,
   Shopping: ShoppingCart,
@@ -57,7 +58,22 @@ export const ICON_MAP: Record<IconName, LucideIcon> = {
   Tech: Smartphone,
   Utility: Zap,
   Beauty: Sparkles,
-  Coffee: Coffee
+  Coffee: Coffee,
+  Music: Music,
+  Camera: Camera,
+  Heart: Heart,
+  Mail: Mail,
+  MapPin: MapPin,
+  Brush: Brush,
+  Moon: Moon,
+  Sun: Sun,
+  Gamepad: Gamepad2,
+  Bike: Bike,
+  Wallet: Wallet,
+  Calendar: CalendarDays,
+  Shirt: Shirt,
+  Scissors: Scissors,
+  Hammer: Hammer
 };
 
 // Ampliamos la lista de iconos para el selector

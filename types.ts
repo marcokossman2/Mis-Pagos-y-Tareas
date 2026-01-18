@@ -1,7 +1,8 @@
 
 export type IconName = 
   | 'Bill' | 'Shopping' | 'Work' | 'Home' | 'Health' | 'Gym' | 'Study' | 'Social' | 'Other'
-  | 'Food' | 'Transport' | 'Gift' | 'Stream' | 'Travel' | 'Pet' | 'Tech' | 'Utility' | 'Beauty' | 'Coffee';
+  | 'Food' | 'Transport' | 'Gift' | 'Stream' | 'Travel' | 'Pet' | 'Tech' | 'Utility' | 'Beauty' | 'Coffee'
+  | 'Music' | 'Camera' | 'Heart' | 'Mail' | 'MapPin' | 'Brush' | 'Moon' | 'Sun' | 'Gamepad' | 'Bike' | 'Wallet' | 'Calendar' | 'Shirt' | 'Scissors' | 'Hammer';
 
 export interface Payment {
   id: string;
@@ -26,3 +27,5 @@ export interface Task {
 export type DayOfWeek = 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo';
 
 export const DAYS: DayOfWeek[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+export type AppScreen = 'payments' | 'planner' | 'history';
