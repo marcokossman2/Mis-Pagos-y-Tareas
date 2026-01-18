@@ -140,7 +140,6 @@ const App: React.FC = () => {
 
   const handleInstallClick = async () => {
     if (isIOS) {
-      // En iOS solo informamos, no hay prompt programático
       alert("Para instalar: Pulsa el botón 'Compartir' en Safari y selecciona 'Añadir a la pantalla de inicio'.");
       return;
     }
@@ -157,12 +156,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-rose-50 shadow-2xl overflow-hidden relative border-x border-rose-100">
+    <div className="flex flex-col flex-1 h-full w-full max-w-md mx-auto bg-rose-50 shadow-2xl overflow-hidden relative border-x border-rose-100">
       
-      {/* PWA Install Banner Adaptado */}
+      {/* PWA Install Banner */}
       {showInstallBanner && (
         <div className="absolute top-[env(safe-area-inset-top,1rem)] left-4 right-4 z-[100] animate-in slide-in-from-top-10 duration-500">
-          <div className="bg-white/90 backdrop-blur-xl border border-rose-100 p-4 rounded-[2rem] shadow-2xl flex items-center justify-between">
+          <div className="bg-white/95 backdrop-blur-xl border border-rose-100 p-4 rounded-[2rem] shadow-2xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-100">
                 {isIOS ? <Share size={20} /> : <Download size={20} />}

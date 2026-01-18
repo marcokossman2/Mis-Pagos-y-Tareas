@@ -14,24 +14,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
         :root {
             --sat: env(safe-area-inset-top);
-            --sar: env(safe-area-inset-right);
             --sab: env(safe-area-inset-bottom);
-            --sal: env(safe-area-inset-left);
         }
+
+        /* Reset robusto para móviles */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #fff1f2; /* rose-50 */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior: none;
-            height: 100%;
-            width: 100%;
-            position: fixed; /* Evita scroll elástico del body en iOS */
+            display: flex;
+            flex-direction: column;
         }
+
         #root {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
             height: 100%;
             width: 100%;
+            min-height: 100%;
         }
+
+        /* Clases de utilidad para áreas seguras */
+        .pt-safe { padding-top: var(--sat, 0px); }
+        .pb-safe { padding-bottom: var(--sab, 0px); }
     </style>
 <script type="importmap">
 {
@@ -46,7 +63,7 @@
 }
 </script>
 </head>
-<body class="bg-rose-50 text-slate-900 overflow-hidden">
+<body class="text-slate-900">
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
     <script>
