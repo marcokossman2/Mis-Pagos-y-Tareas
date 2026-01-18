@@ -20,6 +20,7 @@ export interface Task {
   day: string; // Lunes, Martes, etc.
   done: boolean;
   icon: IconName;
+  reminderMinutes?: number; // Minutos antes de la tarea
 }
 
 export type DayOfWeek = 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo';

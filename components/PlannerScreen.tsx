@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Trash2, Heart, Circle, Clock, Save } from 'lucide-react';
+import { Plus, Trash2, Heart, Clock, Save, Bell } from 'lucide-react';
 import { Task, DayOfWeek, DAYS, IconName } from '../types.ts';
 import { ICON_MAP } from '../constants.tsx';
 import { IconPicker } from './IconPicker.tsx';
@@ -11,6 +11,15 @@ interface PlannerScreenProps {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
+const REMINDER_OPTIONS = [
+  { label: 'Sin recordatorio', value: 0 },
+  { label: 'Al momento', value: 1 },
+  { label: '5 min antes', value: 5 },
+  { label: '15 min antes', value: 15 },
+  { label: '30 min antes', value: 30 },
+  { label: '1 hora antes', value: 60 },
+];
+
 export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,6 +29,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
   const [time, setTime] = useState(() => localStorage.getItem('draft_task_time') || '');
   const [day, setDay] = useState<DayOfWeek>(() => (localStorage.getItem('draft_task_day') as DayOfWeek) || 'Lunes');
   const [icon, setIcon] = useState<IconName>(() => (localStorage.getItem('draft_task_icon') as IconName) || 'Work');
+  const [reminder, setReminder] = useState<number>(0);
 
   useEffect(() => {
     localStorage.setItem('draft_task_name', name);
@@ -46,7 +56,8 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
       time,
       day,
       done: false,
-      icon
+      icon,
+      reminderMinutes: reminder > 0 ? reminder : undefined
     };
 
     setTasks(prev => [...prev, newTask]);
@@ -54,6 +65,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
     setDesc('');
     setTime('');
     setIcon('Work');
+    setReminder(0);
     setIsAdding(false);
     
     localStorage.removeItem('draft_task_name');
@@ -63,6 +75,10 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
     localStorage.removeItem('draft_task_icon');
     
     audioService.playSuccess();
+
+    if (reminder > 0 && "Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
   };
 
   const toggleTask = (id: string) => {
@@ -94,70 +110,77 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
   }, [tasks]);
 
   return (
-    <div className="flex flex-col h-full bg-rose-50/30">
-      <div className="p-6 flex justify-between items-center bg-white border-b border-purple-100">
-        <div>
-          <h1 className="text-2xl font-bold text-purple-800">Semana</h1>
-          <div className="flex items-center space-x-1 h-4">
-            {isSaving && (
-              <span className="text-[10px] text-purple-400 font-bold uppercase flex items-center animate-pulse">
-                <Save size={10} className="mr-1" /> Guardado
-              </span>
-            )}
-          </div>
+    <div className="flex flex-col h-full bg-rose-50/20">
+      <div className="p-8 pb-4 flex justify-between items-center bg-white/50 backdrop-blur-sm">
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-bold text-indigo-800 tracking-tight">Mi Semana</h1>
+          {isSaving && (
+            <span className="text-[10px] text-purple-400 font-bold uppercase mt-1 animate-pulse flex items-center">
+              <Save size={10} className="mr-1" /> Guardando...
+            </span>
+          )}
         </div>
         <button 
           onClick={() => setIsAdding(!isAdding)}
-          className={`p-2 rounded-full shadow-lg transition-all active:scale-95 ${
-            isAdding ? 'bg-purple-50 text-purple-500' : 'bg-purple-500 text-white shadow-purple-100'
-          }`}
+          className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 bg-gradient-to-br from-purple-300 to-purple-500 text-white shadow-purple-200`}
         >
-          <Plus size={24} className={`transition-transform duration-300 ${isAdding ? 'rotate-45' : ''}`} />
+          <Plus size={28} className={`transition-transform duration-300 ${isAdding ? 'rotate-45' : ''}`} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-32">
         {isAdding && (
-          <form onSubmit={addTask} className="bg-white p-5 rounded-2xl shadow-sm border border-purple-100 space-y-4 animate-in fade-in zoom-in-95 duration-300">
+          <form onSubmit={addTask} className="bg-white p-6 rounded-3xl shadow-xl border border-purple-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-wider ml-1">Tarea</label>
+              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Tarea</label>
               <input 
                 type="text" value={name} onChange={e => setName(e.target.value)}
-                className="w-full p-3 bg-purple-50/30 border border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
                 placeholder="¿Qué planes tienes?"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-wider ml-1">Detalles</label>
+              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Detalles</label>
               <textarea 
                 value={desc} onChange={e => setDesc(e.target.value)}
-                className="w-full p-3 bg-purple-50/30 border border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-300 outline-none h-20 text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none h-20 text-slate-700"
                 placeholder="Añade una notita..."
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-purple-300 uppercase tracking-wider ml-1">Hora</label>
+                <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Hora</label>
                 <input 
                   type="time" value={time} onChange={e => setTime(e.target.value)}
-                  className="w-full p-3 bg-purple-50/30 border border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-300 outline-none"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-purple-300 uppercase tracking-wider ml-1">Día</label>
+                <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Día</label>
                 <select 
                   value={day} onChange={e => setDay(e.target.value as DayOfWeek)}
-                  className="w-full p-3 bg-purple-50/30 border border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
                 >
                   {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1 flex items-center">
+                <Bell size={12} className="mr-1" /> Recordatorio
+              </label>
+              <select 
+                value={reminder} onChange={e => setReminder(parseInt(e.target.value))}
+                className="w-full p-4 bg-purple-50/30 border border-purple-100 rounded-2xl focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
+              >
+                {REMINDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            </div>
              <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-wider ml-1">Icono</label>
+              <label className="text-[11px] font-bold text-purple-300 uppercase tracking-widest ml-1">Icono</label>
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
-            <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-purple-50 active:opacity-90 active:scale-[0.98] transition-all">
+            <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 active:scale-95 transition-transform">
               Añadir a la Agenda
             </button>
           </form>
@@ -166,9 +189,9 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
         {DAYS.map(d => (
           <div key={d} className="space-y-3">
             <h2 className="text-[10px] font-bold text-purple-300 uppercase tracking-widest px-1">{d}</h2>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {groupedTasks[d].length === 0 ? (
-                <div className="p-4 rounded-2xl bg-white/40 border border-dashed border-purple-100 text-center text-purple-200 text-xs italic">
+                <div className="p-5 rounded-3xl bg-white/40 border border-dashed border-purple-100 text-center text-purple-200 text-sm italic">
                   Nada planeado
                 </div>
               ) : (
@@ -177,17 +200,17 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                   return (
                     <div 
                       key={t.id} 
-                      className={`p-4 rounded-2xl border transition-all flex items-center space-x-4 bg-white ${
+                      className={`p-5 rounded-3xl border transition-all flex items-center space-x-4 bg-white/70 ${
                         t.done 
-                        ? 'border-purple-100 bg-purple-50/30' 
-                        : 'border-purple-50 shadow-sm hover:shadow-md'
+                        ? 'border-purple-100 bg-purple-50/20' 
+                        : 'border-purple-50 shadow-sm'
                       }`}
                     >
                       <button onClick={() => toggleTask(t.id)} className="transition-all active:scale-125">
                         {t.done ? (
-                          <Heart size={26} className="text-purple-400 fill-purple-400" />
+                          <Heart size={28} className="text-purple-400 fill-purple-400" />
                         ) : (
-                          <Heart size={26} className="text-purple-100" />
+                          <Heart size={28} className="text-purple-100" />
                         )}
                       </button>
                       <div className="flex-1 min-w-0">
@@ -202,9 +225,17 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                             {t.description}
                           </p>
                         )}
-                        <div className="flex items-center space-x-1 mt-1 text-[9px] font-bold text-purple-300 uppercase">
-                          <Clock size={10} />
-                          <span>{t.time}</span>
+                        <div className="flex items-center space-x-3 mt-1 text-[9px] font-bold text-purple-300 uppercase">
+                          <div className="flex items-center space-x-1">
+                            <Clock size={10} />
+                            <span>{t.time}</span>
+                          </div>
+                          {t.reminderMinutes && !t.done && (
+                            <div className="flex items-center space-x-1 text-rose-400">
+                              <Bell size={10} />
+                              <span>-{t.reminderMinutes}m</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <button onClick={() => deleteTask(t.id)} className="p-2 text-purple-100 hover:text-red-400 transition-colors">
