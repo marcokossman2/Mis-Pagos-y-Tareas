@@ -3,7 +3,7 @@
   "name": "LifeFlow: Pagos y Agenda",
   "short_name": "LifeFlow",
   "description": "Gestiona tus pagos y tareas semanales con elegancia.",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#fff1f2",
   "theme_color": "#f43f5e",
