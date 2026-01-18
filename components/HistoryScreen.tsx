@@ -48,7 +48,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
         <div className="flex p-1 bg-slate-100 rounded-2xl">
           <button 
             onClick={() => setTab('paid')}
-            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-xl transition-all ${
+            className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider rounded-xl transition-all ${
               tab === 'paid' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'
             }`}
           >
@@ -56,7 +56,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
           </button>
           <button 
             onClick={() => setTab('deleted')}
-            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-xl transition-all ${
+            className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider rounded-xl transition-all ${
               tab === 'deleted' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400'
             }`}
           >
@@ -81,8 +81,8 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
                       <Icon size={20} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-slate-700 text-sm">{p.description}</h3>
-                      <p className="text-xs text-slate-400 font-medium">${p.amount.toLocaleString()} • {p.dueDate}</p>
+                      <h3 className="font-bold text-slate-700 text-base">{p.description}</h3>
+                      <p className="text-sm text-slate-400 font-medium">${p.amount.toLocaleString()} • {p.dueDate}</p>
                     </div>
                     <div className="flex space-x-2">
                       <button 
@@ -116,8 +116,8 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
                       <Icon size={20} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-slate-500 text-sm line-through">{p.description}</h3>
-                      <p className="text-xs text-slate-400 font-medium">${p.amount.toLocaleString()} • {p.dueDate}</p>
+                      <h3 className="font-bold text-slate-500 text-base line-through">{p.description}</h3>
+                      <p className="text-sm text-slate-400 font-medium">${p.amount.toLocaleString()} • {p.dueDate}</p>
                     </div>
                     <div className="flex space-x-1">
                       <button 
@@ -147,7 +147,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
                     audioService.playTick();
                   }
                 }}
-                className="w-full py-4 text-xs font-bold text-rose-400 uppercase tracking-widest border border-dashed border-rose-100 rounded-3xl hover:bg-rose-50 transition-colors"
+                className="w-full py-4 text-sm font-bold text-rose-400 uppercase tracking-widest border border-dashed border-rose-100 rounded-3xl hover:bg-rose-50 transition-colors"
               >
                 Vaciar Papelera
               </button>

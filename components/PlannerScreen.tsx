@@ -146,8 +146,8 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold text-indigo-800 tracking-tight">Mi Semana</h1>
           {isSaving && (
-            <span className="text-[10px] text-purple-400 font-bold uppercase mt-1 animate-pulse flex items-center">
-              <Save size={10} className="mr-1" /> {editingId ? 'Editando...' : 'Guardando...'}
+            <span className="text-[11px] text-purple-400 font-bold uppercase mt-1 animate-pulse flex items-center">
+              <Save size={11} className="mr-1" /> {editingId ? 'Editando...' : 'Guardando...'}
             </span>
           )}
         </div>
@@ -165,59 +165,59 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
       <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-32">
         {isAdding && (
           <form onSubmit={handleSave} className="bg-white p-6 rounded-3xl shadow-xl border border-purple-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-            <h2 className="text-sm font-bold text-purple-800 uppercase tracking-widest px-1">
+            <h2 className="text-base font-bold text-purple-800 uppercase tracking-widest px-1">
               {editingId ? 'Editar Tarea' : 'Nueva Tarea'}
             </h2>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Tarea</label>
+              <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Tarea</label>
               <input 
                 type="text" value={name} onChange={e => setName(e.target.value)}
-                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 text-base"
                 placeholder="¿Qué planes tienes?"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Detalles</label>
+              <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Detalles</label>
               <textarea 
                 value={desc} onChange={e => setDesc(e.target.value)}
-                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none h-20 text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none h-20 text-slate-700 text-base"
                 placeholder="Añade una notita..."
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Hora</label>
+                <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Hora</label>
                 <input 
                   type="time" value={time} onChange={e => setTime(e.target.value)}
-                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-base"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Día</label>
+                <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Día</label>
                 <select 
                   value={day} onChange={e => setDay(e.target.value as DayOfWeek)}
-                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
+                  className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 text-base"
                 >
                   {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1 flex items-center">
+              <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1 flex items-center">
                 <Bell size={12} className="mr-1" /> Recordatorio
               </label>
               <select 
                 value={reminder} onChange={e => setReminder(parseInt(e.target.value))}
-                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700"
+                className="w-full p-4 bg-purple-50/30 border border-purple-200 rounded-2xl focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 text-base"
               >
                 {REMINDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
               </select>
             </div>
              <div className="space-y-1">
-              <label className="text-[11px] font-bold text-purple-400 uppercase tracking-widest ml-1">Icono</label>
+              <label className="text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Icono</label>
               <IconPicker selected={icon} onSelect={setIcon} />
             </div>
-            <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 active:scale-95 transition-transform">
+            <button type="submit" className="w-full bg-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 active:scale-95 transition-transform text-base">
               {editingId ? 'Actualizar Agenda' : 'Añadir a la Agenda'}
             </button>
           </form>
@@ -225,7 +225,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
 
         {DAYS.map(d => (
           <div key={d} className="space-y-3">
-            <h2 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest px-1">{d}</h2>
+            <h2 className="text-[11px] font-bold text-purple-400 uppercase tracking-widest px-1">{d}</h2>
             <div className="space-y-3">
               {groupedTasks[d].length === 0 ? (
                 <div className="p-5 rounded-3xl bg-white/40 border border-dashed border-purple-100 text-center text-purple-200 text-sm italic">
@@ -253,23 +253,23 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({ tasks, setTasks })
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
                           <Icon size={14} className={t.done ? 'text-purple-200' : 'text-purple-400'} />
-                          <h3 className={`font-semibold truncate text-sm ${t.done ? 'line-through text-purple-200' : 'text-slate-800'}`}>
+                          <h3 className={`font-semibold truncate text-[15px] ${t.done ? 'line-through text-purple-200' : 'text-slate-800'}`}>
                             {t.name}
                           </h3>
                         </div>
                         {t.description && (
-                          <p className={`text-xs truncate ${t.done ? 'text-purple-200' : 'text-slate-500'}`}>
+                          <p className={`text-sm truncate mt-0.5 ${t.done ? 'text-purple-200' : 'text-slate-500'}`}>
                             {t.description}
                           </p>
                         )}
-                        <div className="flex items-center space-x-3 mt-1 text-[9px] font-bold text-purple-400 uppercase">
+                        <div className="flex items-center space-x-3 mt-1.5 text-[10px] font-bold text-purple-400 uppercase">
                           <div className="flex items-center space-x-1">
-                            <Clock size={10} />
+                            <Clock size={11} />
                             <span>{t.time}</span>
                           </div>
                           {t.reminderMinutes && !t.done && (
                             <div className="flex items-center space-x-1 text-rose-500">
-                              <Bell size={10} />
+                              <Bell size={11} />
                               <span>-{t.reminderMinutes}m</span>
                             </div>
                           )}

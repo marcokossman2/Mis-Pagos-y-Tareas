@@ -141,8 +141,8 @@ const App: React.FC = () => {
                 <Download size={20} />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-800">Instalar LifeFlow</p>
-                <p className="text-[10px] text-slate-500 leading-tight">Acceso rápido desde tu inicio</p>
+                <p className="text-base font-bold text-slate-800">Instalar LifeFlow</p>
+                <p className="text-xs text-slate-500 leading-tight">Acceso rápido desde tu inicio</p>
               </div>
             </div>
             <div className="flex items-center space-x-1">
@@ -187,7 +187,7 @@ const App: React.FC = () => {
             }`}
           >
             <CreditCard size={22} strokeWidth={activeScreen === 'payments' ? 2.5 : 2} />
-            <span className="text-[8px] font-extrabold uppercase mt-1 tracking-wider">Pagos</span>
+            <span className="text-[10px] font-extrabold uppercase mt-1 tracking-wider">Pagos</span>
           </button>
           
           <button 
@@ -197,7 +197,7 @@ const App: React.FC = () => {
             }`}
           >
             <Calendar size={22} strokeWidth={activeScreen === 'planner' ? 2.5 : 2} />
-            <span className="text-[8px] font-extrabold uppercase mt-1 tracking-wider">Agenda</span>
+            <span className="text-[10px] font-extrabold uppercase mt-1 tracking-wider">Agenda</span>
           </button>
 
           <button 
@@ -207,7 +207,7 @@ const App: React.FC = () => {
             }`}
           >
             <History size={22} strokeWidth={activeScreen === 'history' ? 2.5 : 2} />
-            <span className="text-[8px] font-extrabold uppercase mt-1 tracking-wider">Historial</span>
+            <span className="text-[10px] font-extrabold uppercase mt-1 tracking-wider">Historial</span>
           </button>
         </div>
       </nav>
