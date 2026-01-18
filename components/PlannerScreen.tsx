@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, Trash2, Heart, Circle, Clock, Save } from 'lucide-react';
-import { Task, DayOfWeek, DAYS, IconName } from '../types';
-import { ICON_MAP } from '../constants';
-import { IconPicker } from './IconPicker';
-import { audioService } from '../services/audio';
+import { Task, DayOfWeek, DAYS, IconName } from '../types.ts';
+import { ICON_MAP } from '../constants.tsx';
+import { IconPicker } from './IconPicker.tsx';
+import { audioService } from '../services/audio.ts';
 
 interface PlannerScreenProps {
   tasks: Task[];

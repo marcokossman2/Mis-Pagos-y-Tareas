@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Calendar } from 'lucide-react';
-import { Payment, Task } from './types';
-import { PaymentScreen } from './components/PaymentScreen';
-import { PlannerScreen } from './components/PlannerScreen';
-import { audioService } from './services/audio';
+import { Payment, Task } from './types.ts';
+import { PaymentScreen } from './components/PaymentScreen.tsx';
+import { PlannerScreen } from './components/PlannerScreen.tsx';
+import { audioService } from './services/audio.ts';
 
 type Screen = 'payments' | 'planner';
 

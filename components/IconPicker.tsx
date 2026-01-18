@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { ICONS } from '../constants';
-import { IconName } from '../types';
+import { ICONS } from '../constants.tsx';
+import { IconName } from '../types.ts';
 
 interface IconPickerProps {
   selected: IconName;
