@@ -1,0 +1,68 @@
+
+import { 
+  CreditCard, 
+  ShoppingCart, 
+  Briefcase, 
+  Home, 
+  Stethoscope, 
+  Dumbbell, 
+  BookOpen, 
+  Users, 
+  MoreHorizontal,
+  Utensils,
+  Car,
+  Gift,
+  Tv,
+  Plane,
+  PawPrint,
+  Smartphone,
+  Zap,
+  Sparkles,
+  Coffee,
+  LucideIcon
+} from 'lucide-react';
+import { IconName } from './types';
+
+export const ICON_MAP: Record<IconName, LucideIcon> = {
+  Bill: CreditCard,
+  Shopping: ShoppingCart,
+  Work: Briefcase,
+  Home: Home,
+  Health: Stethoscope,
+  Gym: Dumbbell,
+  Study: BookOpen,
+  Social: Users,
+  Other: MoreHorizontal,
+  Food: Utensils,
+  Transport: Car,
+  Gift: Gift,
+  Stream: Tv,
+  Travel: Plane,
+  Pet: PawPrint,
+  Tech: Smartphone,
+  Utility: Zap,
+  Beauty: Sparkles,
+  Coffee: Coffee
+};
+
+export const ICONS: { name: IconName; icon: LucideIcon }[] = [
+  { name: 'Bill', icon: CreditCard },
+  { name: 'Shopping', icon: ShoppingCart },
+  { name: 'Work', icon: Briefcase },
+  { name: 'Home', icon: Home },
+  { name: 'Health', icon: Stethoscope },
+  { name: 'Gym', icon: Dumbbell },
+  { name: 'Study', icon: BookOpen },
+  { name: 'Social', icon: Users },
+  { name: 'Food', icon: Utensils },
+  { name: 'Transport', icon: Car },
+  { name: 'Coffee', icon: Coffee },
+  { name: 'Utility', icon: Zap },
+  { name: 'Tech', icon: Smartphone },
+  { name: 'Stream', icon: Tv },
+  { name: 'Gift', icon: Gift },
+  { name: 'Travel', icon: Plane },
+  { name: 'Pet', icon: PawPrint },
+  { name: 'Beauty', icon: Sparkles },
+  { name: 'Other', icon: MoreHorizontal },
+];
