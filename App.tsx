@@ -89,7 +89,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full max-w-md mx-auto bg-rose-50 shadow-2xl overflow-hidden relative border-x border-rose-100">
+    <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-rose-50 shadow-2xl overflow-hidden relative border-x border-rose-100">
       <main className="flex-1 overflow-hidden">
         {activeScreen === 'payments' ? (
           <PaymentScreen payments={payments} setPayments={setPayments} />
