@@ -19,7 +19,22 @@ import {
   Zap,
   Sparkles,
   Coffee,
-  LucideIcon
+  LucideIcon,
+  Music,
+  Camera,
+  Heart,
+  Mail,
+  MapPin,
+  Brush,
+  Moon,
+  Sun,
+  Gamepad2,
+  Bike,
+  Wallet,
+  CalendarDays,
+  Shirt,
+  Scissors,
+  Hammer
 } from 'lucide-react';
 import { IconName } from './types';
 
@@ -45,6 +60,7 @@ export const ICON_MAP: Record<IconName, LucideIcon> = {
   Coffee: Coffee
 };
 
+// Ampliamos la lista de iconos para el selector
 export const ICONS: { name: IconName; icon: LucideIcon }[] = [
   { name: 'Bill', icon: CreditCard },
   { name: 'Shopping', icon: ShoppingCart },
@@ -65,4 +81,24 @@ export const ICONS: { name: IconName; icon: LucideIcon }[] = [
   { name: 'Pet', icon: PawPrint },
   { name: 'Beauty', icon: Sparkles },
   { name: 'Other', icon: MoreHorizontal },
+];
+
+// Iconos adicionales para el "desplegable" completo
+export const ALL_ICONS_LIST = [
+  ...ICONS,
+  { name: 'Music', icon: Music },
+  { name: 'Camera', icon: Camera },
+  { name: 'Heart', icon: Heart },
+  { name: 'Mail', icon: Mail },
+  { name: 'MapPin', icon: MapPin },
+  { name: 'Brush', icon: Brush },
+  { name: 'Moon', icon: Moon },
+  { name: 'Sun', icon: Sun },
+  { name: 'Gamepad', icon: Gamepad2 },
+  { name: 'Bike', icon: Bike },
+  { name: 'Wallet', icon: Wallet },
+  { name: 'Calendar', icon: CalendarDays },
+  { name: 'Shirt', icon: Shirt },
+  { name: 'Scissors', icon: Scissors },
+  { name: 'Hammer', icon: Hammer },
 ];
